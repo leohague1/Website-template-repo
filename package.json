@@ -7,12 +7,17 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "remotion:studio": "remotion studio src/remotion/index.jsx",
+    "remotion:render": "remotion render src/remotion/index.jsx MyComp out/video.mp4"
   },
   "dependencies": {
+    "@remotion/cli": "^4.0.467",
+    "@remotion/player": "^4.0.467",
     "framer-motion": "^12.40.0",
     "react": "^19.2.6",
-    "react-dom": "^19.2.6"
+    "react-dom": "^19.2.6",
+    "remotion": "^4.0.467"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
