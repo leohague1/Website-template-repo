@@ -1,0 +1,7 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: system-ui, 'Segoe UI', Roboto, sans-serif;
+  --color-primary: oklch(55% 0.22 290);
+  --color-primary-light: oklch(70% 0.18 290);
+}
