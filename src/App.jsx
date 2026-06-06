@@ -1,51 +1,45 @@
-import { motion } from 'framer-motion'
-import { Player } from '@remotion/player'
-import { MyComp } from './remotion/MyComp'
+import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { HelmetProvider } from 'react-helmet-async'
+import { ErrorBoundary } from 'react-error-boundary'
+import { Navbar } from './components/Navbar'
+import { Footer } from './components/Footer'
+import Home from './pages/Home'
+import NotFound from './pages/NotFound'
 
-function App() {
+function ErrorFallback({ error, resetErrorBoundary }) {
   return (
-    <div className="min-h-screen bg-white text-gray-900 flex flex-col items-center justify-center px-6 gap-12">
-      <motion.div
-        initial={{ opacity: 0, y: 24 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, ease: 'easeOut' }}
-        className="text-center max-w-xl"
-      >
-        <h1 className="text-5xl font-bold tracking-tight mb-4">
-          Your project name
-        </h1>
-        <p className="text-lg text-gray-500 mb-8">
-          A short description of what this site does.
-        </p>
-        <motion.a
-          href="#"
-          whileHover={{ scale: 1.03 }}
-          whileTap={{ scale: 0.97 }}
-          className="inline-block bg-[--color-primary] text-white px-6 py-3 rounded-xl font-medium shadow-md"
+    <div className="min-h-screen flex items-center justify-center px-4">
+      <div className="text-center max-w-md">
+        <h1 className="text-2xl font-bold text-gray-900 mb-2">Something went wrong</h1>
+        <p className="text-gray-500 text-sm mb-6">{error.message}</p>
+        <button
+          onClick={resetErrorBoundary}
+          className="text-sm font-medium text-[--color-primary] hover:underline"
         >
-          Get started
-        </motion.a>
-      </motion.div>
-
-      {/* Remotion Player embed — remove if not embedding video on this page */}
-      <motion.div
-        initial={{ opacity: 0, y: 16 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.15, ease: 'easeOut' }}
-      >
-        <Player
-          component={MyComp}
-          inputProps={{ message: 'Hello, Remotion!' }}
-          durationInFrames={90}
-          fps={30}
-          compositionWidth={1280}
-          compositionHeight={720}
-          style={{ width: 640, borderRadius: 12, overflow: 'hidden' }}
-          controls
-        />
-      </motion.div>
+          Try again
+        </button>
+      </div>
     </div>
   )
 }
 
-export default App
+export default function App() {
+  return (
+    <HelmetProvider>
+      <BrowserRouter>
+        <ErrorBoundary FallbackComponent={ErrorFallback}>
+          <div className="flex flex-col min-h-screen">
+            <Navbar />
+            <main className="flex-1">
+              <Routes>
+                <Route path="/" element={<Home />} />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </main>
+            <Footer />
+          </div>
+        </ErrorBoundary>
+      </BrowserRouter>
+    </HelmetProvider>
+  )
+}

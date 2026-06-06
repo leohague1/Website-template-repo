@@ -10,6 +10,9 @@ React + Vite website template. When starting a new project, replace the intro pa
 | Vite | 8 | Dev server and bundler |
 | Tailwind CSS | 4 | Via `@tailwindcss/vite` plugin — no `tailwind.config.js` needed |
 | Framer Motion | 12 | All animations and transitions — use `motion.*` components |
+| React Router | 7 | Client-side routing via `react-router-dom` |
+| react-helmet-async | latest | SEO and meta tags — use the `<SEO>` component |
+| react-error-boundary | latest | Runtime error handling — wraps the app in `App.jsx` |
 | Remotion | 4 | Programmatic video; studio + render CLI included. Remove if not needed. |
 
 ## Commands
@@ -20,6 +23,7 @@ npm run dev               # start Vite dev server (http://localhost:5173)
 npm run build             # production build → dist/
 npm run preview           # preview production build locally
 npm run lint              # run ESLint
+npx prettier --write .    # format all files with Prettier
 npm run remotion:studio   # open Remotion Studio (visual timeline editor)
 npm run remotion:render   # render MyComp to out/video.mp4
 ```
@@ -31,17 +35,43 @@ public/
   favicon.svg             # replace with client favicon
   icons.svg               # SVG sprite sheet
 src/
-  components/             # reusable UI components (Navbar, Footer, Button, Card, etc.)
-  pages/                  # page-level components (Home, About, Contact, etc.)
+  components/             # reusable UI components
+    Navbar.jsx            # sticky nav with mobile menu + active NavLink
+    Footer.jsx            # footer with nav links
+    Button.jsx            # motion button with variant + size props
+    SEO.jsx               # Helmet wrapper for title, description, OG tags
+  pages/                  # page-level components (default exports)
+    Home.jsx              # hero starter page
+    NotFound.jsx          # 404 page
   assets/                 # images, fonts, static files
   remotion/
     index.jsx             # Remotion entry point (registerRoot)
     Root.jsx              # <Composition> declarations
     MyComp.jsx            # starter composition — rename/duplicate for each video
   index.css               # global styles + Tailwind imports + @theme tokens
-  App.jsx                 # root component and routing
+  App.jsx                 # providers (HelmetProvider, BrowserRouter, ErrorBoundary) + layout
   main.jsx                # entry point
+.env.example              # env variable stubs — copy to .env.local
+.prettierrc               # Prettier config (single quotes, no semi, 100 char width)
 ```
+
+## Routing
+
+- Routes are defined in `src/App.jsx` using `<Routes>` and `<Route>`
+- Add new pages: create `src/pages/MyPage.jsx`, then add `<Route path="/my-page" element={<MyPage />} />` in `App.jsx`
+- Use `<Link>` / `<NavLink>` from `react-router-dom` for all internal navigation — never `<a href>`
+- The `*` catch-all route renders `<NotFound />`
+
+## SEO
+
+- Use the `<SEO>` component at the top of every page:
+```jsx
+import { SEO } from '../components/SEO'
+
+<SEO title="Page Title" description="One sentence description." />
+```
+- `VITE_APP_NAME` in `.env.local` sets the site name appended to every `<title>`
+- Open Graph and Twitter card tags are set automatically from the same props
 
 ## Styling conventions
 
@@ -57,6 +87,7 @@ src/
 - To change the brand colour for a new project, update `--color-primary` in `index.css`
 - Reference custom tokens in JSX as Tailwind classes: `bg-[--color-primary]`, `text-[--color-primary]`
 - Mobile-first: always use responsive prefixes (`sm:`, `md:`, `lg:`) where needed
+- Max content width is `max-w-6xl` with `px-4 sm:px-6 lg:px-8` horizontal padding
 
 ## Animation conventions
 
@@ -69,6 +100,7 @@ src/
     transition={{ duration: 0.5, ease: 'easeOut' }}
   >
 ```
+- For staggered lists, use `variants` with a parent `staggerChildren` container
 - Use `whileHover` and `whileTap` for interactive elements (buttons, cards, links)
 
 ## Component conventions
@@ -78,16 +110,24 @@ src/
 - Place full page components in `src/pages/`
 - Use named exports for components inside `src/components/`, default export for pages
 
+## Error handling
+
+- The app is wrapped in `<ErrorBoundary FallbackComponent={ErrorFallback}>` in `App.jsx`
+- The `ErrorFallback` component is defined inline in `App.jsx` — customise its copy per project
+- For async errors (data fetching), handle locally with try/catch or React Query error states
+
 ## New project setup checklist
 
 When scaffolding a new project from this template:
 1. Run `npm install`
-2. Update `--color-primary` in `src/index.css` to match the client's brand colour
-3. Replace the favicon at `public/favicon.svg`
-4. Clear out `src/App.jsx` and build the site structure
-5. Create `src/components/` and `src/pages/` folders
-6. Remove Remotion files from `src/remotion/` if video is not needed for this project
-7. Update this `CLAUDE.md` intro with the project name and description
+2. Copy `.env.example` → `.env.local` and set `VITE_APP_NAME`
+3. Update `--color-primary` in `src/index.css` to match the client's brand colour
+4. Replace the favicon at `public/favicon.svg`
+5. Update nav links in `src/components/Navbar.jsx`
+6. Update footer copy and links in `src/components/Footer.jsx`
+7. Build out pages in `src/pages/` and wire routes in `src/App.jsx`
+8. Remove Remotion files from `src/remotion/` if video is not needed for this project
+9. Update this `CLAUDE.md` intro with the project name and description
 
 ## Skills
 
