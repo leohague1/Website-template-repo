@@ -38,10 +38,16 @@ src/
   components/             # reusable UI components
     Navbar.jsx            # sticky nav with mobile menu + active NavLink
     Footer.jsx            # footer with nav links
-    Button.jsx            # motion button with variant + size props
-    SEO.jsx               # Helmet wrapper for title, description, OG tags
+    Button.jsx            # motion button — variant (primary/secondary/outline/ghost) + size (sm/md/lg)
+    Card.jsx              # surface card — hover prop lifts on hover
+    Badge.jsx             # pill label — variant (default/primary/success/warning/error/info)
+    Input.jsx             # text input with label, hint, error state
+    Textarea.jsx          # textarea with label, hint, error state
+    SEO.jsx               # Helmet wrapper for title, description, OG/Twitter tags
+    PageTransition.jsx    # wrap every page in this for route fade/slide transitions
+    ScrollReveal.jsx      # animate children into view on scroll (whileInView)
   pages/                  # page-level components (default exports)
-    Home.jsx              # hero starter page
+    Home.jsx              # hero + features + CTA starter page
     NotFound.jsx          # 404 page
   assets/                 # images, fonts, static files
   remotion/
@@ -49,71 +55,141 @@ src/
     Root.jsx              # <Composition> declarations
     MyComp.jsx            # starter composition — rename/duplicate for each video
   index.css               # global styles + Tailwind imports + @theme tokens
-  App.jsx                 # providers (HelmetProvider, BrowserRouter, ErrorBoundary) + layout
+  App.jsx                 # providers (HelmetProvider, BrowserRouter, ErrorBoundary) + AppLayout
   main.jsx                # entry point
 .env.example              # env variable stubs — copy to .env.local
 .prettierrc               # Prettier config (single quotes, no semi, 100 char width)
 ```
 
+## Design tokens
+
+All tokens are defined in the `@theme {}` block in `src/index.css`. Reference them in JSX as `bg-[--token-name]`, `text-[--token-name]`, etc.
+
+### Colour palette
+
+| Token | Use |
+|---|---|
+| `--color-primary` | Brand colour — buttons, links, accents |
+| `--color-primary-light` | Hover/lighter tint of brand |
+| `--color-primary-dark` | Darker tint for pressed states |
+| `--color-success` / `--color-success-bg` | Positive feedback (green) |
+| `--color-warning` / `--color-warning-bg` | Caution (amber) |
+| `--color-error` / `--color-error-bg` | Destructive / validation errors (red) |
+| `--color-info` / `--color-info-bg` | Neutral information (blue) |
+| `--color-surface` | Subtle off-white background for sections |
+| `--color-border` | Default border colour |
+| `--color-muted` | Secondary/muted text |
+
+To change the brand for a new project, update `--color-primary` (and optionally `--color-primary-light` / `--color-primary-dark`) in `src/index.css`.
+
+### Border radius tokens
+
+| Token | Value | Use |
+|---|---|---|
+| `--radius-sm` | 6px | Inputs, small elements |
+| `--radius-md` | 8px | Buttons |
+| `--radius-lg` | 12px | Cards |
+| `--radius-xl` | 16px | Panels, modals |
+| `--radius-full` | 9999px | Pills, badges |
+
+## Typography scale
+
+Use these class combinations consistently across the project:
+
+| Level | Classes |
+|---|---|
+| Display / Hero h1 | `text-4xl sm:text-6xl font-bold tracking-tight` |
+| Section h2 | `text-3xl sm:text-4xl font-bold tracking-tight` |
+| Card / sub-section h3 | `text-xl sm:text-2xl font-semibold` |
+| Label h4 | `text-lg font-semibold` |
+| Body | `text-base leading-relaxed` |
+| Secondary body | `text-sm text-[--color-muted]` |
+| Caption / hint | `text-xs text-[--color-muted]` |
+
 ## Routing
 
-- Routes are defined in `src/App.jsx` using `<Routes>` and `<Route>`
-- Add new pages: create `src/pages/MyPage.jsx`, then add `<Route path="/my-page" element={<MyPage />} />` in `App.jsx`
+- Routes are defined in `src/App.jsx` inside `AppLayout` using `<Routes>` and `<Route>`
+- Add new pages: create `src/pages/MyPage.jsx`, then add `<Route path="/my-page" element={<MyPage />} />` in `AppLayout`
 - Use `<Link>` / `<NavLink>` from `react-router-dom` for all internal navigation — never `<a href>`
 - The `*` catch-all route renders `<NotFound />`
+- `AnimatePresence` in `AppLayout` drives page transition animations automatically
+
+## Page transitions
+
+Wrap every page's root element in `<PageTransition>` — `AnimatePresence` in `App.jsx` handles the rest:
+
+```jsx
+import { PageTransition } from '../components/PageTransition'
+
+export default function MyPage() {
+  return (
+    <PageTransition>
+      {/* page content */}
+    </PageTransition>
+  )
+}
+```
+
+## Scroll animations
+
+Use `<ScrollReveal>` to animate any element into view as the user scrolls:
+
+```jsx
+import { ScrollReveal } from '../components/ScrollReveal'
+
+<ScrollReveal delay={0.1} direction="up">
+  <Card>...</Card>
+</ScrollReveal>
+```
+
+Props: `delay` (seconds, default 0), `direction` (up/down/left/right, default up).
+Each element animates once (`viewport={{ once: true }}`).
 
 ## SEO
 
-- Use the `<SEO>` component at the top of every page:
+Use the `<SEO>` component at the top of every page:
+
 ```jsx
 import { SEO } from '../components/SEO'
 
 <SEO title="Page Title" description="One sentence description." />
 ```
-- `VITE_APP_NAME` in `.env.local` sets the site name appended to every `<title>`
-- Open Graph and Twitter card tags are set automatically from the same props
+
+`VITE_APP_NAME` in `.env.local` sets the site name appended to every `<title>`. Open Graph and Twitter card tags are set automatically.
 
 ## Styling conventions
 
 - Tailwind CSS 4 is configured in `src/index.css` via `@import "tailwindcss"` — do NOT create a `tailwind.config.js`
-- Custom design tokens live in the `@theme {}` block in `src/index.css`:
-```css
-  @theme {
-    --color-primary: oklch(55% 0.22 290);
-    --color-primary-light: oklch(70% 0.18 290);
-    --font-sans: system-ui, 'Segoe UI', Roboto, sans-serif;
-  }
-```
-- To change the brand colour for a new project, update `--color-primary` in `index.css`
-- Reference custom tokens in JSX as Tailwind classes: `bg-[--color-primary]`, `text-[--color-primary]`
+- Reference custom tokens in JSX as Tailwind classes: `bg-[--color-primary]`, `text-[--color-muted]`
 - Mobile-first: always use responsive prefixes (`sm:`, `md:`, `lg:`) where needed
-- Max content width is `max-w-6xl` with `px-4 sm:px-6 lg:px-8` horizontal padding
+- Max content width: `max-w-6xl` with `px-4 sm:px-6 lg:px-8` horizontal padding
+- Section vertical padding: `py-20 sm:py-28` for standard sections, `py-24 sm:py-36` for hero
 
 ## Animation conventions
 
 - Use Framer Motion for all animations — import `motion` from `framer-motion`
-- Standard entrance animation:
+- Standard entrance animation (hero / above-the-fold):
 ```jsx
-  <motion.div
-    initial={{ opacity: 0, y: 24 }}
-    animate={{ opacity: 1, y: 0 }}
-    transition={{ duration: 0.5, ease: 'easeOut' }}
-  >
+<motion.div
+  initial={{ opacity: 0, y: 24 }}
+  animate={{ opacity: 1, y: 0 }}
+  transition={{ duration: 0.5, ease: 'easeOut' }}
+>
 ```
-- For staggered lists, use `variants` with a parent `staggerChildren` container
-- Use `whileHover` and `whileTap` for interactive elements (buttons, cards, links)
+- Staggered lists: use `variants` with a parent `staggerChildren` container (see `Home.jsx`)
+- Scroll-triggered: use `<ScrollReveal>` — do not manually write `whileInView` on every element
+- Interactive: use `whileHover` / `whileTap` on buttons, cards, links
 
 ## Component conventions
 
-- One component per file, named the same as the file (e.g. `Navbar.jsx` exports `Navbar`)
-- Place shared/reusable components in `src/components/`
-- Place full page components in `src/pages/`
-- Use named exports for components inside `src/components/`, default export for pages
+- One component per file, named the same as the file (e.g. `Card.jsx` exports `Card`)
+- Named exports for `src/components/`, default export for `src/pages/`
+- Wrap every page in `<PageTransition>` and `<SEO>`
 
 ## Error handling
 
 - The app is wrapped in `<ErrorBoundary FallbackComponent={ErrorFallback}>` in `App.jsx`
-- The `ErrorFallback` component is defined inline in `App.jsx` — customise its copy per project
+- `ErrorFallback` is defined inline in `App.jsx` — update its copy per project
 - For async errors (data fetching), handle locally with try/catch or React Query error states
 
 ## New project setup checklist
@@ -121,12 +197,12 @@ import { SEO } from '../components/SEO'
 When scaffolding a new project from this template:
 1. Run `npm install`
 2. Copy `.env.example` → `.env.local` and set `VITE_APP_NAME`
-3. Update `--color-primary` in `src/index.css` to match the client's brand colour
+3. Update `--color-primary` (and light/dark variants) in `src/index.css`
 4. Replace the favicon at `public/favicon.svg`
 5. Update nav links in `src/components/Navbar.jsx`
 6. Update footer copy and links in `src/components/Footer.jsx`
-7. Build out pages in `src/pages/` and wire routes in `src/App.jsx`
-8. Remove Remotion files from `src/remotion/` if video is not needed for this project
+7. Build out pages in `src/pages/` and wire routes in `src/App.jsx`'s `AppLayout`
+8. Remove Remotion files from `src/remotion/` if video is not needed
 9. Update this `CLAUDE.md` intro with the project name and description
 
 ## Skills

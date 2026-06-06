@@ -1,6 +1,7 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom'
 import { HelmetProvider } from 'react-helmet-async'
 import { ErrorBoundary } from 'react-error-boundary'
+import { AnimatePresence } from 'framer-motion'
 import { Navbar } from './components/Navbar'
 import { Footer } from './components/Footer'
 import Home from './pages/Home'
@@ -23,21 +24,31 @@ function ErrorFallback({ error, resetErrorBoundary }) {
   )
 }
 
+function AppLayout() {
+  const location = useLocation()
+
+  return (
+    <div className="flex flex-col min-h-screen">
+      <Navbar />
+      <main className="flex-1">
+        <AnimatePresence mode="wait">
+          <Routes location={location} key={location.pathname}>
+            <Route path="/" element={<Home />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </AnimatePresence>
+      </main>
+      <Footer />
+    </div>
+  )
+}
+
 export default function App() {
   return (
     <HelmetProvider>
       <BrowserRouter>
         <ErrorBoundary FallbackComponent={ErrorFallback}>
-          <div className="flex flex-col min-h-screen">
-            <Navbar />
-            <main className="flex-1">
-              <Routes>
-                <Route path="/" element={<Home />} />
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </main>
-            <Footer />
-          </div>
+          <AppLayout />
         </ErrorBoundary>
       </BrowserRouter>
     </HelmetProvider>
